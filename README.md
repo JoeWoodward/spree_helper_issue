@@ -1,24 +1,41 @@
-# README
+### This app demonstrates a bug that spree introduces while using actiontext in rails 5.2.3
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+If I install action_text in rails 5.2.3 it loads the view helpers correctly, however, if I then install spree the view helper `render_action_text_content` is not loaded.
 
-Things you may want to cover:
+The first commit is a plain app with action text installed, the second commit shows the error.
 
-* Ruby version
+To view the app running correctly
 
-* System dependencies
+```sh
+git checkout 947a54
+bundle install
+bundle exec rails db:setup
+bundle exec rails server
+open http://localhost:3000/foos/1
+```
 
-* Configuration
+You should see the seeded data `foo bar baz` see `open ./app/views/foos/show.html.erb`
 
-* Database creation
+Now if you checkout the second commit with spree installed it fails
 
-* Database initialization
+```sh
+git checkout master
+bundle install
+bundle exec rails db:migrate
+bundle exec rails server
+open http://localhost:3000/foos/1
+```
 
-* How to run the test suite
+I have tried my best to debug but have so far failed. I am using a workaround by manually requiring the helpers in my application controller.
 
-* Services (job queues, cache servers, search engines, etc.)
+```ruby
+# frozen_string_literal: true
 
-* Deployment instructions
+require 'action_text'
 
-* ...
+class ApplicationController < ActionController::Base
+  helpers ActionText::Engine.helpers
+
+  ...
+end
+```
